@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
+import { Play, Sparkles, Loader2 } from "lucide-react";
 import CharacterPanel from "@/components/CharacterPanel";
 import VoiceModeSelector from "@/components/VoiceModeSelector";
 import InteractivePlayer from "@/components/InteractivePlayer";
