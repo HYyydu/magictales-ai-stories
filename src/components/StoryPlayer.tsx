@@ -124,94 +124,96 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Now Playing */}
-      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display font-extrabold text-xl text-foreground">
-            🎧 {story.title}
-          </h2>
-          <span className="text-sm text-muted-foreground font-body">
-            {story.segments.length} segments
-          </span>
-        </div>
-
-        {/* Current segment display */}
-        {currentSegment && isPlaying && (
-          <div className="bg-muted/50 rounded-xl p-4 mb-4 animate-fade-up">
-            <p className="text-xs text-muted-foreground font-body mb-1">
-              {currentSegment.speaker === "narrator" ? "📖 Narrator" : `${story.characters.find(c => c.name.toLowerCase() === currentSegment.speaker.toLowerCase())?.emoji || "🗣️"} ${currentSegment.speaker}`}
-              {" · "}
-              <span className="capitalize">{currentSegment.emotion}</span>
-            </p>
-            <p className="font-body text-foreground text-sm leading-relaxed">
-              "{currentSegment.text}"
-            </p>
-
-            {/* Record controls for My Voice mode */}
-            {voiceMode === "record" && playerState === "playing" && (
-              <div className="mt-3 flex items-center gap-2">
-                {isRecording ? (
-                  <Button variant="destructive" size="sm" onClick={stopRecording}>
-                    <MicOff className="w-4 h-4 mr-1" />
-                    Stop Recording
-                  </Button>
-                ) : (
-                  <Button variant="magic" size="sm" onClick={startRecording}>
-                    <Mic className="w-4 h-4 mr-1" />
-                    Read Aloud
-                  </Button>
-                )}
-                {recordedAudios[activeIndex] && (
-                  <audio src={recordedAudios[activeIndex]} controls className="h-8" />
-                )}
-              </div>
-            )}
+      {/* Now Playing - only visible when actively playing */}
+      {playerState !== "ready" && (
+        <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display font-extrabold text-xl text-foreground">
+              🎧 {story.title}
+            </h2>
+            <span className="text-sm text-muted-foreground font-body">
+              {story.segments.length} segments
+            </span>
           </div>
-        )}
 
-        {/* Progress bar */}
-        <div className="w-full bg-muted rounded-full h-2 mb-4">
-          <div
-            className="h-2 rounded-full transition-all duration-500"
-            style={{
-              width: `${progress}%`,
-              background: "var(--gradient-magic)",
-            }}
-          />
+          {/* Current segment display */}
+          {currentSegment && isPlaying && (
+            <div className="bg-muted/50 rounded-xl p-4 mb-4 animate-fade-up">
+              <p className="text-xs text-muted-foreground font-body mb-1">
+                {currentSegment.speaker === "narrator" ? "📖 Narrator" : `${story.characters.find(c => c.name.toLowerCase() === currentSegment.speaker.toLowerCase())?.emoji || "🗣️"} ${currentSegment.speaker}`}
+                {" · "}
+                <span className="capitalize">{currentSegment.emotion}</span>
+              </p>
+              <p className="font-body text-foreground text-sm leading-relaxed">
+                "{currentSegment.text}"
+              </p>
+
+              {/* Record controls for My Voice mode */}
+              {voiceMode === "record" && playerState === "playing" && (
+                <div className="mt-3 flex items-center gap-2">
+                  {isRecording ? (
+                    <Button variant="destructive" size="sm" onClick={stopRecording}>
+                      <MicOff className="w-4 h-4 mr-1" />
+                      Stop Recording
+                    </Button>
+                  ) : (
+                    <Button variant="magic" size="sm" onClick={startRecording}>
+                      <Mic className="w-4 h-4 mr-1" />
+                      Read Aloud
+                    </Button>
+                  )}
+                  {recordedAudios[activeIndex] && (
+                    <audio src={recordedAudios[activeIndex]} controls className="h-8" />
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Progress bar */}
+          <div className="w-full bg-muted rounded-full h-2 mb-4">
+            <div
+              className="h-2 rounded-full transition-all duration-500"
+              style={{
+                width: `${progress}%`,
+                background: "var(--gradient-magic)",
+              }}
+            />
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center justify-center gap-3">
+            <Button variant="outline" size="icon" onClick={handleSkipBack}>
+              <SkipBack className="w-4 h-4" />
+            </Button>
+
+            {playerState === "finished" ? (
+              <Button variant="magic" size="lg" onClick={handlePlay}>
+                <Play className="w-5 h-5" />
+                Replay
+              </Button>
+            ) : playerState === "playing" && voiceMode === "ai" ? (
+              <Button variant="magic" size="lg" onClick={handlePause}>
+                <Pause className="w-5 h-5" />
+                Pause
+              </Button>
+            ) : playerState === "paused" ? (
+              <Button variant="magic" size="lg" onClick={handleResume}>
+                <Play className="w-5 h-5" />
+                Resume
+              </Button>
+            ) : null}
+
+            <Button variant="outline" size="icon" onClick={handleSkipForward}>
+              <SkipForward className="w-4 h-4" />
+            </Button>
+
+            <Button variant="destructive" size="icon" onClick={handleStop}>
+              <Square className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-3">
-          <Button variant="outline" size="icon" onClick={handleSkipBack} disabled={playerState === "ready"}>
-            <SkipBack className="w-4 h-4" />
-          </Button>
-
-          {playerState === "ready" || playerState === "finished" ? (
-            <Button variant="magic" size="lg" onClick={handlePlay}>
-              <Play className="w-5 h-5" />
-              {playerState === "finished" ? "Replay" : "Play Story"}
-            </Button>
-          ) : playerState === "playing" && voiceMode === "ai" ? (
-            <Button variant="magic" size="lg" onClick={handlePause}>
-              <Pause className="w-5 h-5" />
-              Pause
-            </Button>
-          ) : playerState === "paused" ? (
-            <Button variant="magic" size="lg" onClick={handleResume}>
-              <Play className="w-5 h-5" />
-              Resume
-            </Button>
-          ) : null}
-
-          <Button variant="outline" size="icon" onClick={handleSkipForward} disabled={playerState === "ready"}>
-            <SkipForward className="w-4 h-4" />
-          </Button>
-
-          <Button variant="destructive" size="icon" onClick={handleStop} disabled={playerState === "ready"}>
-            <Square className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+      )}
 
       {/* Voice Mode Selector (shown before playing) */}
       {playerState === "ready" && (
@@ -225,6 +227,14 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
           activeCharacter={currentSegment?.speaker}
         />
       </div>
+
+      {/* Start To Play button (shown in ready state) */}
+      {playerState === "ready" && (
+        <Button variant="magic" size="lg" className="w-full text-lg py-6" onClick={handlePlay}>
+          <Play className="w-5 h-5" />
+          Start To Play
+        </Button>
+      )}
 
       {/* Story finished: Summary & Learning */}
       {playerState === "finished" && (
