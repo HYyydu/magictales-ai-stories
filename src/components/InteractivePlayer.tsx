@@ -312,12 +312,6 @@ const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: Interactiv
               <SkipForward className="w-4 h-4 text-white/70" />
             </button>
 
-            <button
-              onClick={handleStop}
-              className="w-10 h-10 rounded-full bg-red-500/20 hover:bg-red-500/30 flex items-center justify-center transition-colors"
-            >
-              <Square className="w-4 h-4 text-red-400" />
-            </button>
           </div>
 
         </div>
