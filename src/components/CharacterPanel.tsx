@@ -1,14 +1,14 @@
 import type { StoryCharacter } from "@/types/story";
 
 const VOICE_LABELS: Record<string, string> = {
-  calm: "🎙️ Calm & Soothing",
-  deep: "🔊 Deep & Strong",
-  cheerful: "😊 Cheerful & Bright",
-  "high-pitched": "🎵 High & Squeaky",
-  gruff: "😤 Gruff & Rough",
-  gentle: "💫 Gentle & Soft",
-  wise: "🦉 Wise & Warm",
-  playful: "🎪 Playful & Fun",
+  calm: "Calm & Soothing",
+  deep: "Deep & Strong",
+  cheerful: "Cheerful & Bright",
+  "high-pitched": "High & Squeaky",
+  gruff: "Gruff & Rough",
+  gentle: "Gentle & Soft",
+  wise: "Wise & Warm",
+  playful: "Playful & Fun",
 };
 
 interface CharacterPanelProps {
