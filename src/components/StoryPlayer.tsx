@@ -16,6 +16,7 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
   const [recordingSegmentIndex, setRecordingSegmentIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudios, setRecordedAudios] = useState<Record<number, string>>({});
+  const [voiceSample, setVoiceSample] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const speech = useSpeechSynthesis();
