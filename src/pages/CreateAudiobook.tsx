@@ -156,7 +156,7 @@ const CreateAudiobook = () => {
             </Link>
           </Button>
           <h1 className="font-display font-extrabold text-2xl text-foreground">
-            📖 Create Audiobook
+            Create Audiobook
           </h1>
         </div>
 
@@ -165,7 +165,7 @@ const CreateAudiobook = () => {
             {/* Quick Start */}
             <div>
               <h2 className="font-display font-bold text-lg text-foreground mb-4">
-                ⚡ Quick Start — Pick a Story
+                Quick Start — Pick a Story
               </h2>
               <div className="grid gap-3">
                 {STORY_LIBRARY.map((s) => (
