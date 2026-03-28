@@ -14,6 +14,7 @@ interface InteractivePlayerProps {
 }
 
 const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: InteractivePlayerProps) => {
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
