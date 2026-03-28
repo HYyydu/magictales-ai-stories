@@ -215,7 +215,7 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
 
       {/* Voice Mode Selector (shown before playing) */}
       {playerState === "ready" && (
-        <VoiceModeSelector voiceMode={voiceMode} onModeChange={setVoiceMode} />
+        <VoiceModeSelector voiceMode={voiceMode} onModeChange={setVoiceMode} voiceSample={voiceSample} onVoiceSampleChange={setVoiceSample} />
       )}
 
       {/* Character Panel */}
