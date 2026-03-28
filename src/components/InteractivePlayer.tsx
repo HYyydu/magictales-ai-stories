@@ -19,10 +19,6 @@ const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: Interactiv
   const [isPaused, setIsPaused] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [showQA, setShowQA] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [qaMessages, setQaMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
-  const [isAskingAI, setIsAskingAI] = useState(false);
   const [pulseActive, setPulseActive] = useState(false);
 
   // Recording mode state
