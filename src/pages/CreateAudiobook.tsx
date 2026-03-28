@@ -150,25 +150,19 @@ const CreateAudiobook = () => {
               <div className="flex-1 h-px bg-border" />
             </div>
 
-            {/* Custom */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" size="lg" className="flex-1" onClick={() => setMode("custom")}>
-                <BookOpen className="w-5 h-5" />
-                Write Your Own Story
-              </Button>
-              <Button variant="outline" size="lg" className="flex-1 relative" asChild>
-                <label>
-                  <Upload className="w-5 h-5" />
-                  Upload a .txt File
-                  <input
-                    type="file"
-                    accept=".txt,text/plain"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    onChange={handleFileUpload}
-                  />
-                </label>
-              </Button>
-            </div>
+            {/* Upload */}
+            <Button variant="outline" size="lg" className="w-full relative" asChild>
+              <label>
+                <Upload className="w-5 h-5" />
+                Upload
+                <input
+                  type="file"
+                  accept=".txt,text/plain"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  onChange={handleFileUpload}
+                />
+              </label>
+            </Button>
           </div>
         )}
 
