@@ -5,11 +5,13 @@ import heroBg from "@/assets/hero-bg.jpg";
 const FloatingElement = ({
   children,
   className,
+  style,
 }: {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }) => (
-  <div className={`absolute pointer-events-none select-none ${className}`}>
+  <div className={`absolute pointer-events-none select-none ${className}`} style={style}>
     {children}
   </div>
 );
