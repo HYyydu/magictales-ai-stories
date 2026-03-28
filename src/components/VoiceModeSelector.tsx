@@ -83,7 +83,7 @@ const VoiceModeSelector = ({ voiceMode, onModeChange, voiceSample, onVoiceSample
   return (
     <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
       <h3 className="font-display font-bold text-lg text-foreground mb-3">
-        🎙️ Choose Narrator Voice
+        Choose Narrator Voice
       </h3>
       <p className="text-sm text-muted-foreground font-body mb-4">
         How would you like the story to be narrated?

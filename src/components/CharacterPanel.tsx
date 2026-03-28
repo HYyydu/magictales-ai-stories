@@ -20,7 +20,7 @@ const CharacterPanel = ({ characters, activeCharacter }: CharacterPanelProps) =>
   return (
     <div className="space-y-3">
       <h3 className="font-display font-bold text-lg text-foreground">
-        🎭 Characters
+        Characters
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {characters.filter(c => c.name.toLowerCase() !== "narrator").map((char) => (
