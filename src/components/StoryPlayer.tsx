@@ -80,7 +80,7 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
         variant="magic"
         size="lg"
         className="w-full text-lg py-6"
-        onClick={() => setStarted(true)}
+        onClick={handleStart}
       >
         <Play className="w-5 h-5" />
         Start To Play
