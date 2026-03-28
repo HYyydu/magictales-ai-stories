@@ -156,7 +156,7 @@ const CreateAudiobook = () => {
             </Link>
           </Button>
           <h1 className="font-display font-extrabold text-2xl text-foreground">
-            📖 Create Audiobook
+            Create Audiobook
           </h1>
         </div>
 
