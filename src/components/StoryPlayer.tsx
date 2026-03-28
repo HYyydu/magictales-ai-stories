@@ -181,43 +181,10 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
         </div>
       </div>
 
-      {/* Q&A Section */}
-      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
-        <h3 className="font-display font-bold text-lg text-foreground mb-3">
-          🎤 Ask a Question
-        </h3>
-        <p className="text-sm text-muted-foreground font-body mb-4">
-          Curious about the story? Ask anything and get a kid-friendly answer!
-        </p>
-
-        {qaAnswer && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 mb-4 animate-fade-up">
-            <p className="text-sm font-body text-foreground mb-3">{qaAnswer}</p>
-            <Button variant="outline" size="sm" onClick={handleDismissAnswer}>
-              Got it! Continue story →
-            </Button>
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          <Input
-            placeholder="e.g. Why did the wolf blow the house?"
-            value={qaQuestion}
-            onChange={(e) => setQaQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAskQuestion()}
-            disabled={qaLoading}
-            className="font-body"
-          />
-          <Button
-            variant="magic"
-            size="icon"
-            onClick={handleAskQuestion}
-            disabled={qaLoading || !qaQuestion.trim()}
-          >
-            {qaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </Button>
-        </div>
-      </div>
+      {/* Voice Mode Selector (shown before playing) */}
+      {playerState === "ready" && (
+        <VoiceModeSelector voiceMode={voiceMode} onModeChange={setVoiceMode} />
+      )}
 
       {/* Character Panel */}
       <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
