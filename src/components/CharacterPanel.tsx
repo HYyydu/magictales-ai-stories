@@ -23,7 +23,7 @@ const CharacterPanel = ({ characters, activeCharacter }: CharacterPanelProps) =>
         🎭 Characters
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {characters.map((char) => (
+        {characters.filter(c => c.name.toLowerCase() !== "narrator").map((char) => (
           <div
             key={char.name}
             className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-300 ${
