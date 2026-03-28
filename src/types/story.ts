@@ -18,4 +18,6 @@ export interface ProcessedStory {
   learningInsights: string[];
 }
 
-export type PlayerState = "idle" | "processing" | "ready" | "playing" | "paused" | "asking" | "finished";
+export type PlayerState = "idle" | "processing" | "ready" | "playing" | "paused" | "asking" | "finished" | "recording";
+
+export type VoiceMode = "ai" | "record";
