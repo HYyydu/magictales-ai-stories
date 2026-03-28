@@ -8,9 +8,8 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/80 backdrop-blur-md border-b border-primary-foreground/10">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-1.5 text-primary-foreground font-display font-extrabold text-xl">
-          <span>MagicTales-AI</span>
-          <Sparkles className="w-4 h-4 text-accent" />
+        <a href="/" className="text-primary-foreground font-display font-extrabold text-xl">
+          MagicTales-AI
         </a>
 
         {/* Center Nav */}
