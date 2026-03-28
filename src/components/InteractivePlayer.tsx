@@ -166,34 +166,6 @@ const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: Interactiv
     setIsRecording(false);
   }, []);
 
-  // Q&A - interrupt to ask
-  const handleAskQuestion = useCallback(async () => {
-    if (!question.trim()) return;
-    const q = question.trim();
-    setQuestion("");
-    setQaMessages((prev) => [...prev, { role: "user", text: q }]);
-    setIsAskingAI(true);
-
-    // Pause while asking
-    if (isPlaying && !isPaused) handlePause();
-
-    try {
-      const { data, error } = await supabase.functions.invoke("story-qa", {
-        body: {
-          question: q,
-          storyContext: `Title: ${story.title}. Summary: ${story.summary}`,
-          currentSegment: currentSegment?.text || "",
-        },
-      });
-      if (error) throw error;
-      setQaMessages((prev) => [...prev, { role: "ai", text: data.answer || "I'm not sure, let's keep reading!" }]);
-    } catch (err) {
-      console.error("Q&A error:", err);
-      setQaMessages((prev) => [...prev, { role: "ai", text: "Oops! I couldn't think of an answer. Try again!" }]);
-    } finally {
-      setIsAskingAI(false);
-    }
-  }, [question, story, currentSegment, isPlaying, isPaused, handlePause]);
 
   return (
     <div className="space-y-6 animate-fade-up">
