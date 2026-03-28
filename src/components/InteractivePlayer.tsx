@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Square, SkipForward, SkipBack, Mic, MicOff, MessageCircleQuestion, Send, X, Loader2 } from "lucide-react";
+import { Play, Pause, Square, SkipForward, SkipBack, Mic, MicOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProcessedStory, StorySegment } from "@/types/story";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
@@ -19,10 +19,6 @@ const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: Interactiv
   const [isPaused, setIsPaused] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [showQA, setShowQA] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [qaMessages, setQaMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
-  const [isAskingAI, setIsAskingAI] = useState(false);
   const [pulseActive, setPulseActive] = useState(false);
 
   // Recording mode state
@@ -170,34 +166,6 @@ const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: Interactiv
     setIsRecording(false);
   }, []);
 
-  // Q&A - interrupt to ask
-  const handleAskQuestion = useCallback(async () => {
-    if (!question.trim()) return;
-    const q = question.trim();
-    setQuestion("");
-    setQaMessages((prev) => [...prev, { role: "user", text: q }]);
-    setIsAskingAI(true);
-
-    // Pause while asking
-    if (isPlaying && !isPaused) handlePause();
-
-    try {
-      const { data, error } = await supabase.functions.invoke("story-qa", {
-        body: {
-          question: q,
-          storyContext: `Title: ${story.title}. Summary: ${story.summary}`,
-          currentSegment: currentSegment?.text || "",
-        },
-      });
-      if (error) throw error;
-      setQaMessages((prev) => [...prev, { role: "ai", text: data.answer || "I'm not sure, let's keep reading!" }]);
-    } catch (err) {
-      console.error("Q&A error:", err);
-      setQaMessages((prev) => [...prev, { role: "ai", text: "Oops! I couldn't think of an answer. Try again!" }]);
-    } finally {
-      setIsAskingAI(false);
-    }
-  }, [question, story, currentSegment, isPlaying, isPaused, handlePause]);
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -352,87 +320,9 @@ const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: Interactiv
             </button>
           </div>
 
-          {/* Ask a Question button */}
-          <button
-            onClick={() => {
-              setShowQA(!showQA);
-              if (!showQA && isPlaying && !isPaused) handlePause();
-            }}
-            className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 text-sm font-body transition-all hover:scale-105 border border-white/10"
-          >
-            <MessageCircleQuestion className="w-4 h-4" />
-            Ask a Question
-          </button>
         </div>
       </div>
 
-      {/* Q&A Panel */}
-      {showQA && (
-        <div className="bg-card rounded-2xl border border-border p-5 shadow-sm animate-fade-up">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-bold text-base text-foreground">
-              💬 Ask About the Story
-            </h3>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowQA(false)}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Chat messages */}
-          {qaMessages.length > 0 && (
-            <div className="space-y-3 max-h-48 overflow-y-auto mb-3 pr-1">
-              {qaMessages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[80%] px-3 py-2 rounded-xl text-sm font-body ${
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-              {isAskingAI && (
-                <div className="flex justify-start">
-                  <div className="bg-muted text-foreground px-3 py-2 rounded-xl text-sm flex items-center gap-2">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Input */}
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAskQuestion()}
-              placeholder="Why did the wolf huff and puff? 🤔"
-              className="flex-1 px-4 py-2.5 rounded-xl bg-muted border border-border text-sm font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-            <Button
-              variant="magic"
-              size="icon"
-              onClick={handleAskQuestion}
-              disabled={!question.trim() || isAskingAI}
-              className="shrink-0"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground font-body mt-2">
-            The story pauses while you ask. Tap Resume to continue!
-          </p>
-        </div>
-      )}
 
     </div>
   );
