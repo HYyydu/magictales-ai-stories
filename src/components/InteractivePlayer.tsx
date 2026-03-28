@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Square, SkipForward, SkipBack, Mic, MicOff, MessageCircleQuestion, Send, X, Loader2 } from "lucide-react";
+import { Play, Pause, Square, SkipForward, SkipBack, Mic, MicOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProcessedStory, StorySegment } from "@/types/story";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
