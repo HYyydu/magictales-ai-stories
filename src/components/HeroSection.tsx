@@ -41,25 +41,6 @@ const HeroSection = () => {
         />
       </div>
 
-      {/* Floating Elements */}
-      <FloatingElement className="top-[15%] left-[8%] animate-float text-4xl opacity-70">
-        ⭐
-      </FloatingElement>
-      <FloatingElement className="top-[25%] right-[10%] animate-float-slow text-3xl opacity-60">
-        📖
-      </FloatingElement>
-      <FloatingElement className="bottom-[30%] left-[12%] animate-float-slow text-3xl opacity-50">
-        🎵
-      </FloatingElement>
-      <FloatingElement className="top-[40%] right-[5%] animate-sparkle text-2xl opacity-60">
-        ✨
-      </FloatingElement>
-      <FloatingElement className="bottom-[20%] right-[15%] animate-float text-3xl opacity-50">
-        🎧
-      </FloatingElement>
-      <FloatingElement className="top-[10%] left-[40%] animate-sparkle text-xl opacity-40" style={{ animationDelay: "1s" } as React.CSSProperties}>
-        ⭐
-      </FloatingElement>
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
