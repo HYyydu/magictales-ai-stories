@@ -44,18 +44,62 @@ const CreateAudiobook = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== "text/plain" && !file.name.endsWith(".txt")) {
+    const name = file.name.toLowerCase();
+    const type = file.type;
+
+    try {
+      let text = "";
+
+      if (type === "text/plain" || name.endsWith(".txt")) {
+        text = await file.text();
+      } else if (name.endsWith(".epub") || type === "application/epub+zip") {
+        const ePub = (await import("epubjs")).default;
+        const arrayBuffer = await file.arrayBuffer();
+        const book = ePub(arrayBuffer);
+        await book.ready;
+        const spine = book.spine as any;
+        const sections: string[] = [];
+        for (const item of spine.items) {
+          const doc = await book.load(item.href);
+          const body = (doc as Document).querySelector("body");
+          if (body) sections.push(body.textContent?.trim() || "");
+        }
+        text = sections.filter(Boolean).join("\n\n");
+        book.destroy();
+      } else if (type === "application/pdf" || name.endsWith(".pdf")) {
+        text = await file.text();
+        toast({
+          title: "PDF Note",
+          description: "PDF text extraction is basic. For best results, use .txt or .epub files.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Unsupported File",
+          description: "Please upload a .txt, .epub, or .pdf file.",
+        });
+        return;
+      }
+
+      if (!text.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Empty File",
+          description: "Could not extract text from this file.",
+        });
+        return;
+      }
+
+      setStoryText(text);
+      setMode("custom");
+    } catch (err) {
+      console.error("File parse error:", err);
       toast({
         variant: "destructive",
-        title: "Invalid File",
-        description: "Please upload a .txt file",
+        title: "Parse Error",
+        description: "Failed to read the file. Try a different format.",
       });
-      return;
     }
-
-    const text = await file.text();
-    setStoryText(text);
-    setMode("custom");
   };
 
   if (isProcessing) {
