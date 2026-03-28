@@ -83,13 +83,17 @@ const HeroSection = () => {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 opacity-0 animate-fade-up"
           style={{ animationDelay: "0.4s" }}
         >
-          <Button variant="magic" size="xl">
-            <Mic className="w-5 h-5" />
-            Start Your Audiobook
+          <Button variant="magic" size="xl" asChild>
+            <Link to="/create">
+              <Mic className="w-5 h-5" />
+              Start Your Audiobook
+            </Link>
           </Button>
-          <Button variant="magic-outline" size="xl">
-            <Upload className="w-5 h-5" />
-            Upload Your Story
+          <Button variant="magic-outline" size="xl" asChild>
+            <Link to="/create">
+              <Upload className="w-5 h-5" />
+              Upload Your Story
+            </Link>
           </Button>
         </div>
 
