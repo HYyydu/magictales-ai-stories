@@ -201,7 +201,7 @@ const CreateAudiobook = () => {
                 Upload
                 <input
                   type="file"
-                  accept=".txt,text/plain"
+                  accept=".txt,.epub,.pdf,text/plain,application/epub+zip,application/pdf"
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   onChange={handleFileUpload}
                 />
