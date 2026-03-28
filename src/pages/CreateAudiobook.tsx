@@ -135,7 +135,7 @@ const CreateAudiobook = () => {
               </Link>
             </Button>
             <h1 className="font-display font-extrabold text-2xl text-foreground">
-              🎧 Now Playing
+              Now Playing
             </h1>
           </div>
           <StoryPlayer story={processedStory} />

@@ -1,14 +1,14 @@
 import type { StoryCharacter } from "@/types/story";
 
 const VOICE_LABELS: Record<string, string> = {
-  calm: "🎙️ Calm & Soothing",
-  deep: "🔊 Deep & Strong",
-  cheerful: "😊 Cheerful & Bright",
-  "high-pitched": "🎵 High & Squeaky",
-  gruff: "😤 Gruff & Rough",
-  gentle: "💫 Gentle & Soft",
-  wise: "🦉 Wise & Warm",
-  playful: "🎪 Playful & Fun",
+  calm: "Calm & Soothing",
+  deep: "Deep & Strong",
+  cheerful: "Cheerful & Bright",
+  "high-pitched": "High & Squeaky",
+  gruff: "Gruff & Rough",
+  gentle: "Gentle & Soft",
+  wise: "Wise & Warm",
+  playful: "Playful & Fun",
 };
 
 interface CharacterPanelProps {
@@ -20,7 +20,7 @@ const CharacterPanel = ({ characters, activeCharacter }: CharacterPanelProps) =>
   return (
     <div className="space-y-3">
       <h3 className="font-display font-bold text-lg text-foreground">
-        🎭 Characters
+        Characters
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {characters.filter(c => c.name.toLowerCase() !== "narrator").map((char) => (
