@@ -1,11 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Square, SkipForward, SkipBack, Mic, MessageCircle, Loader2, Send } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
+import { Play, Pause, Square, SkipForward, SkipBack, Mic, MicOff } from "lucide-react";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import CharacterPanel from "@/components/CharacterPanel";
-import type { ProcessedStory, PlayerState } from "@/types/story";
+import VoiceModeSelector from "@/components/VoiceModeSelector";
+import type { ProcessedStory, PlayerState, VoiceMode } from "@/types/story";
 
 interface StoryPlayerProps {
   story: ProcessedStory;
@@ -13,87 +12,114 @@ interface StoryPlayerProps {
 
 const StoryPlayer = ({ story }: StoryPlayerProps) => {
   const [playerState, setPlayerState] = useState<PlayerState>("ready");
-  const [qaQuestion, setQaQuestion] = useState("");
-  const [qaAnswer, setQaAnswer] = useState("");
-  const [qaLoading, setQaLoading] = useState(false);
+  const [voiceMode, setVoiceMode] = useState<VoiceMode>("ai");
+  const [recordingSegmentIndex, setRecordingSegmentIndex] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudios, setRecordedAudios] = useState<Record<number, string>>({});
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
   const speech = useSpeechSynthesis();
 
+  // --- AI Voice handlers ---
   const handlePlay = useCallback(() => {
+    if (voiceMode === "record") {
+      setPlayerState("playing");
+      setRecordingSegmentIndex(0);
+      return;
+    }
     setPlayerState("playing");
-    setQaAnswer("");
     speech.play(story.segments, story.characters, 0, () => {
       setPlayerState("finished");
     });
-  }, [story, speech]);
+  }, [story, speech, voiceMode]);
 
   const handleResume = useCallback(() => {
     setPlayerState("playing");
-    speech.resume();
-  }, [speech]);
+    if (voiceMode === "ai") speech.resume();
+  }, [speech, voiceMode]);
 
   const handlePause = useCallback(() => {
     setPlayerState("paused");
-    speech.pause();
-  }, [speech]);
+    if (voiceMode === "ai") speech.pause();
+  }, [speech, voiceMode]);
 
   const handleStop = useCallback(() => {
     setPlayerState("ready");
-    speech.stop();
-    setQaAnswer("");
-  }, [speech]);
+    if (voiceMode === "ai") speech.stop();
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+    setRecordingSegmentIndex(0);
+  }, [speech, voiceMode]);
 
   const handleSkipForward = useCallback(() => {
+    if (voiceMode === "record") {
+      const next = Math.min(recordingSegmentIndex + 1, story.segments.length - 1);
+      setRecordingSegmentIndex(next);
+      if (next >= story.segments.length - 1) setPlayerState("finished");
+      return;
+    }
     const next = Math.min(speech.currentSegmentIndex + 1, story.segments.length - 1);
-    speech.play(story.segments, story.characters, next, () => {
-      setPlayerState("finished");
-    });
-  }, [speech, story]);
+    speech.play(story.segments, story.characters, next, () => setPlayerState("finished"));
+  }, [speech, story, voiceMode, recordingSegmentIndex]);
 
   const handleSkipBack = useCallback(() => {
-    const prev = Math.max(speech.currentSegmentIndex - 1, 0);
-    speech.play(story.segments, story.characters, prev, () => {
-      setPlayerState("finished");
-    });
-  }, [speech, story]);
-
-  const handleAskQuestion = useCallback(async () => {
-    if (!qaQuestion.trim()) return;
-
-    // Pause story
-    speech.pause();
-    setPlayerState("asking");
-    setQaLoading(true);
-
-    try {
-      const currentSegment = story.segments[speech.currentSegmentIndex]?.text || "";
-      const storyContext = `"${story.title}" - ${story.summary}`;
-
-      const { data, error } = await supabase.functions.invoke("story-qa", {
-        body: { question: qaQuestion, storyContext, currentSegment },
-      });
-
-      if (error) throw error;
-      setQaAnswer(data.answer);
-    } catch (e) {
-      console.error("Q&A error:", e);
-      setQaAnswer("Oops! I couldn't answer that right now. Let's keep listening to the story! 📖");
-    } finally {
-      setQaLoading(false);
-      setQaQuestion("");
+    if (voiceMode === "record") {
+      setRecordingSegmentIndex(Math.max(recordingSegmentIndex - 1, 0));
+      return;
     }
-  }, [qaQuestion, story, speech]);
+    const prev = Math.max(speech.currentSegmentIndex - 1, 0);
+    speech.play(story.segments, story.characters, prev, () => setPlayerState("finished"));
+  }, [speech, story, voiceMode, recordingSegmentIndex]);
 
-  const handleDismissAnswer = useCallback(() => {
-    setQaAnswer("");
-    setPlayerState("playing");
-    speech.resume();
-  }, [speech]);
+  // --- Recording handlers ---
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
 
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const url = URL.createObjectURL(blob);
+        setRecordedAudios((prev) => ({ ...prev, [recordingSegmentIndex]: url }));
+        stream.getTracks().forEach((t) => t.stop());
+
+        // Auto-advance to next segment
+        if (recordingSegmentIndex < story.segments.length - 1) {
+          setRecordingSegmentIndex((i) => i + 1);
+        } else {
+          setPlayerState("finished");
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch {
+      console.error("Mic access denied");
+    }
+  }, [recordingSegmentIndex, story.segments.length]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+  }, []);
+
+  // --- Derived state ---
+  const activeIndex = voiceMode === "record" ? recordingSegmentIndex : speech.currentSegmentIndex;
   const progress = story.segments.length > 0
-    ? Math.round(((speech.currentSegmentIndex + 1) / story.segments.length) * 100)
+    ? Math.round(((activeIndex + 1) / story.segments.length) * 100)
     : 0;
-
-  const currentSegment = story.segments[speech.currentSegmentIndex];
+  const currentSegment = story.segments[activeIndex];
+  const isPlaying = playerState === "playing" || playerState === "paused" || playerState === "recording";
 
   return (
     <div className="space-y-6">
@@ -109,7 +135,7 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
         </div>
 
         {/* Current segment display */}
-        {currentSegment && (playerState === "playing" || playerState === "paused" || playerState === "asking") && (
+        {currentSegment && isPlaying && (
           <div className="bg-muted/50 rounded-xl p-4 mb-4 animate-fade-up">
             <p className="text-xs text-muted-foreground font-body mb-1">
               {currentSegment.speaker === "narrator" ? "📖 Narrator" : `${story.characters.find(c => c.name.toLowerCase() === currentSegment.speaker.toLowerCase())?.emoji || "🗣️"} ${currentSegment.speaker}`}
@@ -119,6 +145,26 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
             <p className="font-body text-foreground text-sm leading-relaxed">
               "{currentSegment.text}"
             </p>
+
+            {/* Record controls for My Voice mode */}
+            {voiceMode === "record" && playerState === "playing" && (
+              <div className="mt-3 flex items-center gap-2">
+                {isRecording ? (
+                  <Button variant="destructive" size="sm" onClick={stopRecording}>
+                    <MicOff className="w-4 h-4 mr-1" />
+                    Stop Recording
+                  </Button>
+                ) : (
+                  <Button variant="magic" size="sm" onClick={startRecording}>
+                    <Mic className="w-4 h-4 mr-1" />
+                    Read Aloud
+                  </Button>
+                )}
+                {recordedAudios[activeIndex] && (
+                  <audio src={recordedAudios[activeIndex]} controls className="h-8" />
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -135,12 +181,7 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
 
         {/* Controls */}
         <div className="flex items-center justify-center gap-3">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleSkipBack}
-            disabled={playerState === "idle" || playerState === "processing" || playerState === "ready"}
-          >
+          <Button variant="outline" size="icon" onClick={handleSkipBack} disabled={playerState === "ready"}>
             <SkipBack className="w-4 h-4" />
           </Button>
 
@@ -149,75 +190,32 @@ const StoryPlayer = ({ story }: StoryPlayerProps) => {
               <Play className="w-5 h-5" />
               {playerState === "finished" ? "Replay" : "Play Story"}
             </Button>
-          ) : playerState === "playing" ? (
+          ) : playerState === "playing" && voiceMode === "ai" ? (
             <Button variant="magic" size="lg" onClick={handlePause}>
               <Pause className="w-5 h-5" />
               Pause
             </Button>
-          ) : playerState === "paused" || playerState === "asking" ? (
+          ) : playerState === "paused" ? (
             <Button variant="magic" size="lg" onClick={handleResume}>
               <Play className="w-5 h-5" />
               Resume
             </Button>
           ) : null}
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleSkipForward}
-            disabled={playerState === "idle" || playerState === "processing" || playerState === "ready"}
-          >
+          <Button variant="outline" size="icon" onClick={handleSkipForward} disabled={playerState === "ready"}>
             <SkipForward className="w-4 h-4" />
           </Button>
 
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={handleStop}
-            disabled={playerState === "idle" || playerState === "processing" || playerState === "ready"}
-          >
+          <Button variant="destructive" size="icon" onClick={handleStop} disabled={playerState === "ready"}>
             <Square className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      {/* Q&A Section */}
-      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
-        <h3 className="font-display font-bold text-lg text-foreground mb-3">
-          🎤 Ask a Question
-        </h3>
-        <p className="text-sm text-muted-foreground font-body mb-4">
-          Curious about the story? Ask anything and get a kid-friendly answer!
-        </p>
-
-        {qaAnswer && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 mb-4 animate-fade-up">
-            <p className="text-sm font-body text-foreground mb-3">{qaAnswer}</p>
-            <Button variant="outline" size="sm" onClick={handleDismissAnswer}>
-              Got it! Continue story →
-            </Button>
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          <Input
-            placeholder="e.g. Why did the wolf blow the house?"
-            value={qaQuestion}
-            onChange={(e) => setQaQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAskQuestion()}
-            disabled={qaLoading}
-            className="font-body"
-          />
-          <Button
-            variant="magic"
-            size="icon"
-            onClick={handleAskQuestion}
-            disabled={qaLoading || !qaQuestion.trim()}
-          >
-            {qaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </Button>
-        </div>
-      </div>
+      {/* Voice Mode Selector (shown before playing) */}
+      {playerState === "ready" && (
+        <VoiceModeSelector voiceMode={voiceMode} onModeChange={setVoiceMode} />
+      )}
 
       {/* Character Panel */}
       <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
