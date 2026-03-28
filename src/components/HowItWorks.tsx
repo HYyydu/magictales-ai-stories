@@ -1,6 +1,4 @@
-import { BookOpen, Mic, Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { BookOpen, Mic, Headphones } from "lucide-react";
 
 const steps = [
   {
@@ -14,9 +12,9 @@ const steps = [
     description: "Follow the on-screen prompts to add your voice—and even a personalized message!",
   },
   {
-    icon: Share2,
-    title: "Share Your Voice",
-    description: "Save your custom storybook to enjoy anytime or share it with your favorite book lover!",
+    icon: Headphones,
+    title: "Get Your Audio Book",
+    description: "Get your audiobook with multiple characters and different background music.",
   },
 ];
 
@@ -31,7 +29,7 @@ const HowItWorks = () => {
           Connect with anyone, anywhere through the power of story.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-14">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
           {steps.map(({ icon: Icon, title, description }) => (
             <div key={title} className="flex flex-col items-center gap-4">
               <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -44,13 +42,6 @@ const HowItWorks = () => {
             </div>
           ))}
         </div>
-
-        <Button variant="magic" size="lg" asChild>
-          <Link to="/create">
-            <Mic className="w-5 h-5" />
-            Record your first story
-          </Link>
-        </Button>
       </div>
     </section>
   );
