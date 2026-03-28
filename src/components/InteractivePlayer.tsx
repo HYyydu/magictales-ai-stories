@@ -61,6 +61,13 @@ const InteractivePlayer = ({ story, voiceMode, voiceSample, onStop }: Interactiv
     setPulseActive(isPlaying && !isPaused);
   }, [isPlaying, isPaused]);
 
+  // Auto-navigate to study card when finished
+  useEffect(() => {
+    if (isFinished) {
+      navigate("/study-card", { state: { story } });
+    }
+  }, [isFinished, navigate, story]);
+
   // Auto-start playback
   useEffect(() => {
     if (voiceMode === "ai") {
